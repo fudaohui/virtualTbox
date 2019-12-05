@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+				        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+				        http://www.springframework.org/schema/context 
+				        http://www.springframework.org/schema/context/spring-context-4.0.xsd"
+       default-autowire="byName" default-lazy-init="false">
+    <!-- 加载配置文件 -->
+    <context:property-placeholder location="classpath:config.properties" ignore-unresolvable="true"/>
+
+    <context:component-scan base-package="com.fdh.simulator"/>
+    <!-- 线程池配置,处理登陆使用和实时数据发送 -->
+    <bean id="taskExecutor"
+          class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <!-- 核心线程数 -->
+        <property name="corePoolSize" value="50"/>
+        <!-- 最大线程数 -->
+        <property name="maxPoolSize" value="500"/>
+        <!-- 队列最大长度 -->
+        <property name="queueCapacity" value="5000"/>
+        <!-- 线程池维护线程所允许的空闲时间 -->
+        <property name="keepAliveSeconds" value="60"/>
+        <!-- 处理程序遭到拒绝将抛出运行时 RejectedExecutionException的处理策略 -->
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$AbortPolicy"/>
+        </property>
+    </bean>
+
+    <!-- SpringContextUtils定义 -->
+    <bean id="springContextUtils" class="com.fdh.simulator.utils.SpringContextUtils" lazy-init="false"/>
+
+    <!--调度任务-->
+    <bean id="timerTask" class="com.fdh.simulator.task.ScheduleTask" lazy-init="false">
+        <property name="count" value="${client.send.count}"/>
+        <property name="packeExpiredTime" value="${client.receive.expired.time}"/>
+        <property name="tcpConnections" value="${client.tcp.connections}"/>
+        <property name="threadPoolTaskExecutor" ref="taskExecutor"/>
+    </bean>
+
+    <bean id="simulator" class="com.fdh.simulator.Simulator" lazy-init="false">
+        <property name="address" value="${client.serverip}"/>
+        <property name="suffix" value="${client.vin.suffix}"/>
+        <property name="port" value="${client.serverport}"/>
+        <property name="sendInterval" value="${client.send.interval}"/>
+        <property name="tcpConnections" value="${client.tcp.connections}"/>
+        <property name="timerTask" ref="timerTask"/>
+    </bean>
+</beans>

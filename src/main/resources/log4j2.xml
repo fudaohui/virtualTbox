@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration status="off" monitorInterval="1800">
+
+    <properties>
+        <property name="LOG_HOME">/logs/iov-simulator/</property>
+        <property name="FILE_NAME">info</property>
+    </properties>
+
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="trace" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %t %class{36} %L %M - %msg%xEx%n"/>
+        </Console>
+
+        <RollingRandomAccessFile name="INFO" fileName="${LOG_HOME}/${FILE_NAME}.log"
+                                 filePattern="${LOG_HOME}/${FILE_NAME}_%d{yyyy-MM-dd}_%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} %-5level %t %class{36} %L %M - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10">
+                <Delete basePath="${LOG_HOME}/" maxDepth="1">
+                    <IfFileName glob="*.log.zip"/>
+                    <IfLastModified age="1H"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="ERROR"
+                                 fileName="${LOG_HOME}/${FILE_NAME}-ERROR.log"
+                                 filePattern="${LOG_HOME}/${FILE_NAME}-ERROR_%d{yyyy-MM-dd}_%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <PatternLayout
+                    pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} %-5level %t %class{36} %L %M - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingRandomAccessFile>
+
+        <!--全部日志信息:DEBUG及以上级别-->
+        <RollingRandomAccessFile name="ALL" fileName="${LOG_HOME}/${FILE_NAME}-ALL.log"
+                                 filePattern="${LOG_HOME}/${FILE_NAME}-ALL%d{yyyy-MM-dd}_%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} %-5level %t %class{36} %L %M - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingRandomAccessFile>
+
+        <Routing name="Routing">
+            <Routes pattern="$${ctx:ROUTINGKEY}">
+                <!-- This route is chosen if ThreadContext has value 'special' for key ROUTINGKEY. -->
+                <!--<Route key="special">-->
+                <!--<RollingFile name="Rolling-${ctx:ROUTINGKEY}" fileName="logs/special-${ctx:ROUTINGKEY}.log"-->
+                <!--filePattern="./logs/${date:yyyy-MM}/${ctx:ROUTINGKEY}-special-%d{yyyy-MM-dd}-%i.log.gz">-->
+                <!--<PatternLayout>-->
+                <!--<Pattern>%d{ISO8601} [%t] %p %c{3} - %m%n</Pattern>-->
+                <!--</PatternLayout>-->
+                <!--<Policies>-->
+                <!--<TimeBasedTriggeringPolicy interval="6" modulate="true"/>-->
+                <!--<SizeBasedTriggeringPolicy size="10MB"/>-->
+                <!--</Policies>-->
+                <!--</RollingFile>-->
+                <!--</Route>-->
+                <!-- This route is chosen if ThreadContext has no value for key ROUTINGKEY. -->
+                <!--<Route key="$${ctx:ROUTINGKEY}">-->
+                <!--<RollingFile name="Rolling-default" fileName="logs/default.log"-->
+                <!--filePattern="./logs/${date:yyyy-MM}/default-%d{yyyy-MM-dd}-%i.log.gz">-->
+                <!--<PatternLayout>-->
+                <!--<pattern>%d{ISO8601} [%t] %p %c{3} - %m%n</pattern>-->
+                <!--</PatternLayout>-->
+                <!--<Policies>-->
+                <!--<TimeBasedTriggeringPolicy interval="6" modulate="true"/>-->
+                <!--<SizeBasedTriggeringPolicy size="10 MB"/>-->
+                <!--</Policies>-->
+                <!--</RollingFile>-->
+                <!--</Route>-->
+                <!-- This route is chosen if ThreadContext has a value for ROUTINGKEY
+                     (other than the value 'special' which had its own route above).
+                     The value dynamically determines the name of the log file. -->
+                <Route>
+                    <RollingFile name="Rolling-${ctx:ROUTINGKEY}"
+                                 fileName="${LOG_HOME}${date:yyyy-MM-dd}/${ctx:ROUTINGKEY}.log"
+                                 filePattern="./logs/iov-gateway/${date:yyyy-MM-dd}/${ctx:ROUTINGKEY}-%d{yyyy-MM-dd}-%i.log.gz">
+                        <PatternLayout
+                                pattern="[%d{MM-dd HH:mm:ss}]  %m%n"/>
+                        <Policies>
+                            <TimeBasedTriggeringPolicy interval="1"/>
+                            <SizeBasedTriggeringPolicy size="50MB"/>
+                        </Policies>
+                    </RollingFile>
+                </Route>
+            </Routes>
+        </Routing>
+        <!--配置异步写日志-->
+        <Async name="Async">
+            <AppenderRef ref="ALL"/>
+        </Async>
+    </Appenders>
+
+    <Loggers>
+
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="INFO"/>
+            <AppenderRef ref="ERROR"/>
+            <AppenderRef ref="Routing"/>
+        </Root>
+    </Loggers>
+</Configuration>
