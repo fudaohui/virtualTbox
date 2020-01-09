@@ -41,10 +41,14 @@
 
     <bean id="simulator" class="com.fdh.simulator.Simulator" lazy-init="false">
         <property name="address" value="${client.serverip}"/>
-        <property name="suffix" value="${client.vin.suffix}"/>
         <property name="port" value="${client.serverport}"/>
         <property name="sendInterval" value="${client.send.interval}"/>
         <property name="tcpConnections" value="${client.tcp.connections}"/>
         <property name="timerTask" ref="timerTask"/>
+    </bean>
+
+    <bean id="packetService" class="com.fdh.simulator.utils.BuildPacketService" lazy-init="false">
+        <property name="preffix" value="${client.vin.preffix}"/>
+        <property name="suffix" value="${client.vin.suffix}"/>
     </bean>
 </beans>

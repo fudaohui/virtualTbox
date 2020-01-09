@@ -47,13 +47,13 @@ public class ByteUtils {
     /**
      * 转换short为byte
      *
-     * @param dst
      * @param src   需要转换的short
-     * @param index
      */
-    public static void putShort(byte[] dst, short src, int index) {
-        dst[index] = (byte) (src >> 8);
-        dst[index + 1] = (byte) (src >> 0);
+    public static byte[] getShortBytes(short src) {
+        byte[] ret = new  byte[2];
+        ret[0] = (byte) (src >> 8);
+        ret[1] = (byte) (src >> 0);
+        return ret;
     }
 
     /**

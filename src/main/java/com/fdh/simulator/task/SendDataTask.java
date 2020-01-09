@@ -3,11 +3,9 @@ package com.fdh.simulator.task;
 
 import com.fdh.simulator.NettyChannelManager;
 import com.fdh.simulator.PacketAnalyze;
-import com.fdh.simulator.Simulator;
-import com.fdh.simulator.constant.CommandTag;
-import com.fdh.simulator.model.Tbox;
+import com.fdh.simulator.constant.CommandTagEnum;
+import com.fdh.simulator.utils.BuildPacketService;
 import com.fdh.simulator.utils.ByteUtils;
-import com.fdh.simulator.utils.VechileUtils;
 import io.netty.channel.Channel;
 import net.jodah.expiringmap.ExpirationPolicy;
 import org.slf4j.Logger;
@@ -26,11 +24,11 @@ public class SendDataTask implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(SendDataTask.class);
     private Channel channel;
-    private CommandTag commandTag;
+    private CommandTagEnum commandTag;
     private int packeExpiredTime;
-    private String vin;
+    private String ddeviceCode;
 
-    public SendDataTask(Channel channel, CommandTag commandTag, int packeExpiredTime) {
+    public SendDataTask(Channel channel, CommandTagEnum commandTag, int packeExpiredTime) {
         this.channel = channel;
         this.commandTag = commandTag;
         this.packeExpiredTime = packeExpiredTime;
@@ -42,32 +40,21 @@ public class SendDataTask implements Runnable {
             long packetSerialNum = 0;
             byte[] packet = new byte[0];
             String logstr = "";
-            vin = NettyChannelManager.getVin(channel);
-            if (commandTag == CommandTag.REALTIME_INFO_REPORT) {//只统计实时数据上报
+            String toHexString = "";
+            ddeviceCode = NettyChannelManager.getVin(channel);
+            if (commandTag == CommandTagEnum.XBOX_LOGIN_REPORT) {//登陆
                 packetSerialNum = PacketAnalyze.getPacketSerialNum();
-                PacketAnalyze.sendPacketMap.put(packetSerialNum, System.currentTimeMillis(), ExpirationPolicy.CREATED, packeExpiredTime, TimeUnit.SECONDS);
-                logstr = "[NO." + packetSerialNum + "]=>";
-                packet = VechileUtils.getPacket(commandTag, vin, packetSerialNum, null, null);
-                String toHexString = ByteUtils.bytesToHexString(packet);
-//                logger.info("[车辆]" + "[" + vin + "][SENDED]" + logstr + toHexString);
-            } else if (commandTag == CommandTag.VEHICLE_REGISTER) {
-//                packetSerialNum = PacketAnalyze.getPacketSerialNum();
-//                PacketAnalyze.sendPacketMap.put(packetSerialNum, System.currentTimeMillis(), ExpirationPolicy.CREATED, packeExpiredTime, TimeUnit.SECONDS);
-                logstr = "[NO." + packetSerialNum + "]=>";
-//                Tbox tbox = VechileUtils.getTbox();
-//                packet = VechileUtils.getPacket(commandTag, tbox.getVin(), packetSerialNum, tbox.getIccid(), tbox.getDeviceId());
-                packet = VechileUtils.getPacket(commandTag, vin, packetSerialNum, null, null);
-                String toHexString = ByteUtils.bytesToHexString(packet);
-                logger.info("[车辆]" + "[" + vin + "][SENDED]" + logstr + toHexString);
-            } else if (commandTag == CommandTag.VEHICLE_LOGIN) {
-                packet = VechileUtils.getPacket(commandTag, vin, packetSerialNum, null, null);
-                String toHexString = ByteUtils.bytesToHexString(packet);
-                logger.info("[车辆]" + "[" + vin + "][SENDED]" + logstr + toHexString);
+                //记录发送的流水号
+//                PacketAnalyze.sendPacketMap.put(ddeviceCode + packetSerialNum, System.currentTimeMillis(), ExpirationPolicy.CREATED, packeExpiredTime, TimeUnit.SECONDS);
+                logstr = "[NO." + ddeviceCode + packetSerialNum + "]=>";
+                packet = BuildPacketService.buildLoginPacket(ddeviceCode);
+                toHexString = ByteUtils.bytesToHexString(packet);
             }
+            logger.info("[车辆]" + "[" + ddeviceCode + "][SENDED]" + logstr + toHexString);
             channel.writeAndFlush(packet);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("发送报文失败,vin:" + vin, e);
+            logger.error("发送报文失败,ddeviceCode:" + ddeviceCode, e);
         }
     }
 }

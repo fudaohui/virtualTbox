@@ -15,13 +15,13 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class PacketAnalyze {
 
-    public static AtomicLong atomicLong = new AtomicLong(0);
+    public static AtomicInteger atomicLong = new AtomicInteger(0);
 
     /**
      * key packetserialNum
      * value send packet timestamp
      */
-    public static ExpiringMap<Long, Long> sendPacketMap = ExpiringMap.builder()
+    public static ExpiringMap<String, Long> sendPacketMap = ExpiringMap.builder()
             .variableExpiration()
             .expirationListener(new PacketLisenner())
             .build();
@@ -34,8 +34,8 @@ public class PacketAnalyze {
      */
     public static ConcurrentHashMap<Long, Integer> receiveMap = new ConcurrentHashMap<Long, Integer>();
 
-    public static long getPacketSerialNum() {
-        return atomicLong.incrementAndGet();
+    public static short getPacketSerialNum() {
+        return (short) atomicLong.incrementAndGet();
     }
 
     /**

@@ -1,11 +1,13 @@
 package com.fdh.simulator.task;
 
+import com.fdh.simulator.codec.CustomerDelimiterBasedFrameDecoder;
 import com.fdh.simulator.codec.StreamByteDecoder;
 import com.fdh.simulator.codec.StreamByteEncoder;
 import com.fdh.simulator.handler.SimulatorHandler;
 import com.fdh.simulator.NettyChannelManager;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -27,6 +29,9 @@ public class ConnectTask implements Runnable {
     private int port;
     private Integer taskId;
     private EventLoopGroup workgroup;
+
+    //报文分隔符
+    ByteBuf delimiter = Unpooled.copiedBuffer(new byte[]{0x7E});
 
     public ConnectTask(String address, int port, Integer taskId, EventLoopGroup workgroup) {
         this.address = address;
@@ -53,9 +58,7 @@ public class ConnectTask implements Runnable {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
                 ch.pipeline().addLast(new StreamByteEncoder());//解码
-                ch.pipeline().addLast(new StreamByteDecoder());//解码
-//                ch.pipeline().addLast(new StringEncoder());
-//                ch.pipeline().addLast(new StringDecoder());
+                ch.pipeline().addLast(new CustomerDelimiterBasedFrameDecoder(2048, false, delimiter));//解码
                 ch.pipeline().addLast(new SimulatorHandler());
             }
         });
@@ -65,14 +68,6 @@ public class ConnectTask implements Runnable {
             // Start the client.
             connectFuture = bootstrap.connect(address, port).sync();
             connectFuture.channel().closeFuture().sync();
-//            Channel channel = connectFuture.channel();
-//            boolean isconnected = channel.isActive();
-//            if (isconnected) {
-//                //存放vin和channel的关系
-////                NettyChannelManager.putChannel(channel);
-//            } else {
-//                logger.info("连接失败!");
-//            }
         } catch (InterruptedException e) {
 
             e.printStackTrace();
