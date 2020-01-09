@@ -1,6 +1,6 @@
 package com.fdh.simulator;
 
-import org.springframework.stereotype.Service;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @ProjectName: virtualtbox
@@ -9,39 +9,48 @@ import org.springframework.stereotype.Service;
  * @Description: 时间统计
  * @Date: 2020/1/8 17:06
  */
-@Service
 public class CalculateSevice {
     /**
      * 最小响应时间
      */
-    private Integer minTime;
+    public static Integer minTime;
 
     /**
      * 最大响应时间
      */
-    private Integer maxTime;
+    public static Integer maxTime;
 
     /**
      * 平均响应时间
      */
-    private Integer averTime;
+    public static Integer averTime;
 
     /**
      * 总花费时间
      */
-    private Long totalTime;
+    public static Long totalTime;
+
+    /**
+     * 总接收包数
+     */
+    public static Long totalReceivePacketCount;
+    /**
+     * 总发送包数
+     */
+    public static AtomicLong totalSendedPacketCount;
 
 
     /**
      * 计算最大最小平均总响应时间
      */
-    public synchronized void calculateTime(int costTime, int receivePackeetCount) {
+    public synchronized  static void calculateTime(int costTime) {
 
+        totalReceivePacketCount++;
         //计算总花费时间
         totalTime += costTime;
         //计算平均响应时间
-        averTime = Math.toIntExact(totalTime / receivePackeetCount);
-        if (receivePackeetCount == 1) {
+        averTime = Math.toIntExact(totalTime / totalReceivePacketCount);
+        if (totalReceivePacketCount == 1) {
             maxTime = minTime = costTime;
             return;
         }
@@ -52,5 +61,10 @@ public class CalculateSevice {
         if (costTime < minTime) {
             minTime = costTime;
         }
+    }
+
+
+    public static  void increaseTotalSendedPacketCount(){
+        totalSendedPacketCount.incrementAndGet();
     }
 }

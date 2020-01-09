@@ -1,50 +1,34 @@
 package com.fdh.simulator.model;
 
+import com.fdh.simulator.constant.CommandTagEnum;
+import lombok.Data;
+
 /**
  * @author fudh
  * @ClassNmme Tbox
  * @date 2019/1/28 11:28
- * @Description: TODO
+ * @Description: 解析808平台通用应答
  */
+
+@Data
 public class Tbox {
 
-    private String vin;
-    private String iccid;
-    private String deviceId;
+    /**
+     * 设备号
+     */
+    private String deviceCode;
 
-    public String getVin() {
-        return vin;
-    }
+    /**
+     * 应答命令字
+     */
+    private CommandTagEnum commandTagEnum;
+    /**
+     * 应答流水号
+     */
+    private Short serialNum;
 
-    public void setVin(String vin) {
-        this.vin = vin;
-    }
-
-    public String getIccid() {
-        return iccid;
-    }
-
-    public void setIccid(String iccid) {
-        this.iccid = iccid;
-    }
-
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
-    }
-
-    public Tbox(String vin, String iccid, String deviceId) {
-        this.vin = vin;
-        this.iccid = iccid;
-        this.deviceId = deviceId;
-    }
-
-    public Tbox() {
-        this.vin = vin;
-        this.iccid = iccid;
-        this.deviceId = deviceId;
-    }
+    /**
+     * 应答结果
+     */
+    private byte ret;
 }

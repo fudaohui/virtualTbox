@@ -19,8 +19,22 @@ public class Utils {
         return dateString;
     }
 
-    public enum PrinterStatus {
-        Normal, OutOfPaper, Busy, OtherError
+
+    /**
+     * BCD字节数组===>String
+     *
+     * @param bytes
+     * @return 十进制字符串
+     */
+    public static String bcd2String(byte[] bytes) {
+        StringBuilder temp = new StringBuilder(bytes.length * 2);
+        for (int i = 0; i < bytes.length; i++) {
+            // 高四位
+            temp.append((bytes[i] & 0xf0) >>> 4);
+            // 低四位
+            temp.append(bytes[i] & 0x0f);
+        }
+        return temp.toString().substring(0, 1).equalsIgnoreCase("0") ? temp.toString().substring(1) : temp.toString();
     }
 
     /**

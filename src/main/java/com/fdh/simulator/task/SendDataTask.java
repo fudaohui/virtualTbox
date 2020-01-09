@@ -1,6 +1,7 @@
 package com.fdh.simulator.task;
 
 
+import com.fdh.simulator.CalculateSevice;
 import com.fdh.simulator.NettyChannelManager;
 import com.fdh.simulator.PacketAnalyze;
 import com.fdh.simulator.constant.CommandTagEnum;
@@ -49,6 +50,10 @@ public class SendDataTask implements Runnable {
                 logstr = "[NO." + ddeviceCode + packetSerialNum + "]=>";
                 packet = BuildPacketService.buildLoginPacket(ddeviceCode);
                 toHexString = ByteUtils.bytesToHexString(packet);
+            }else if(commandTag == CommandTagEnum.XBOX_HEARBEAT_REPORT){
+
+                //累加
+                CalculateSevice.increaseTotalSendedPacketCount();
             }
             logger.info("[车辆]" + "[" + ddeviceCode + "][SENDED]" + logstr + toHexString);
             channel.writeAndFlush(packet);

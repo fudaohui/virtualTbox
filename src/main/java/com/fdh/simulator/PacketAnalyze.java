@@ -17,6 +17,7 @@ public class PacketAnalyze {
 
     public static AtomicInteger atomicLong = new AtomicInteger(0);
 
+
     /**
      * key packetserialNum
      * value send packet timestamp
@@ -28,24 +29,11 @@ public class PacketAnalyze {
 
 
 
-    /***
-     * key packetserialNum
-     * value send and recevie time
-     */
-    public static ConcurrentHashMap<Long, Integer> receiveMap = new ConcurrentHashMap<Long, Integer>();
 
     public static short getPacketSerialNum() {
         return (short) atomicLong.incrementAndGet();
     }
 
-    /**
-     * 分析报文性能
-     */
-    public static List<Integer> analyze() {
-        List<Integer> responseDiff = (List<Integer>) receiveMap.values();
-        Collections.sort(responseDiff);
-        return responseDiff;
-    }
 
     /**
      * 计算平均响应时间

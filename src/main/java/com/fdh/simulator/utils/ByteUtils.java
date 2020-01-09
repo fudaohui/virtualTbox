@@ -43,6 +43,23 @@ public class ByteUtils {
 
 
 
+    /**
+     * 根据start和end截取byte数组
+     *
+     * @param src
+     * @param start
+     * @param end
+     * @return
+     */
+    public static byte[] subBytes(byte[] src, int start, int end) {
+
+        if (src == null || start > end || start < 0 || end > src.length) {
+            return src;
+        }
+        byte[] ret = new byte[end - start];
+        System.arraycopy(src, start, ret, 0, end - start);
+        return ret;
+    }
 
     /**
      * 转换short为byte
