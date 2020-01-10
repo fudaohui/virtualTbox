@@ -1,7 +1,7 @@
 package com.fdh.simulator.task;
 
 
-import com.fdh.simulator.CalculateSevice;
+import com.fdh.simulator.Calculate;
 import com.fdh.simulator.NettyChannelManager;
 import com.fdh.simulator.PacketAnalyze;
 import com.fdh.simulator.constant.CommandTagEnum;
@@ -11,6 +11,7 @@ import io.netty.channel.Channel;
 import net.jodah.expiringmap.ExpirationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -27,7 +28,7 @@ public class SendDataTask implements Runnable {
     private Channel channel;
     private CommandTagEnum commandTag;
     private int packeExpiredTime;
-    private String ddeviceCode;
+    private String deviceCode;
 
     public SendDataTask(Channel channel, CommandTagEnum commandTag, int packeExpiredTime) {
         this.channel = channel;
@@ -38,28 +39,27 @@ public class SendDataTask implements Runnable {
     @Override
     public void run() {
         try {
-            long packetSerialNum = 0;
             byte[] packet = new byte[0];
             String logstr = "";
             String toHexString = "";
-            ddeviceCode = NettyChannelManager.getVin(channel);
+            int packetSerialNum = PacketAnalyze.getPacketSerialNum();
+            deviceCode = NettyChannelManager.getVin(channel);
             if (commandTag == CommandTagEnum.XBOX_LOGIN_REPORT) {//登陆
-                packetSerialNum = PacketAnalyze.getPacketSerialNum();
-                //记录发送的流水号
-//                PacketAnalyze.sendPacketMap.put(ddeviceCode + packetSerialNum, System.currentTimeMillis(), ExpirationPolicy.CREATED, packeExpiredTime, TimeUnit.SECONDS);
-                logstr = "[NO." + ddeviceCode + packetSerialNum + "]=>";
-                packet = BuildPacketService.buildLoginPacket(ddeviceCode);
+                packet = BuildPacketService.buildLoginPacket(deviceCode, packetSerialNum);
                 toHexString = ByteUtils.bytesToHexString(packet);
-            }else if(commandTag == CommandTagEnum.XBOX_HEARBEAT_REPORT){
-
+            } else if (commandTag == CommandTagEnum.XBOX_HEARBEAT_REPORT) {
                 //累加
-                CalculateSevice.increaseTotalSendedPacketCount();
+                Calculate.increaseTotalSendedPacketCount();
+                packet = BuildPacketService.buildHeartBeatPacket(deviceCode, packetSerialNum);
+                //记录发送的流水号
+                PacketAnalyze.sendPacketMap.put(deviceCode + packetSerialNum, System.currentTimeMillis(), ExpirationPolicy.CREATED, packeExpiredTime, TimeUnit.SECONDS);
+                toHexString = ByteUtils.bytesToHexString(packet);
             }
-            logger.info("[车辆]" + "[" + ddeviceCode + "][SENDED]" + logstr + toHexString);
+            logger.info("[车辆]" + "[" + deviceCode + "][SENDED]" + logstr + toHexString);
             channel.writeAndFlush(packet);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("发送报文失败,ddeviceCode:" + ddeviceCode, e);
+            logger.error("发送报文失败,deviceCode:" + deviceCode, e);
         }
     }
 }

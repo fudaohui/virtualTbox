@@ -3,7 +3,6 @@ package com.fdh.simulator.utils;
 
 import com.fdh.simulator.constant.CommandTagEnum;
 import com.fdh.simulator.model.Tbox;
-import lombok.Data;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,7 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2019/1/21 8:55
  * @Description: TODO
  */
-@Data
 public class BuildPacketService {
 
 
@@ -22,10 +20,7 @@ public class BuildPacketService {
      * 线程号连接号对应的设备号
      */
     public static ConcurrentHashMap<Integer, String> deviceMap = new ConcurrentHashMap();
-    /**
-     * 连接号从0开始
-     */
-    public static AtomicInteger connectCounn;
+
     /**
      * 发送次数，递减，为0，数据全部发送完成
      */
@@ -38,7 +33,7 @@ public class BuildPacketService {
     /**
      * 设备号后缀
      */
-    private static AtomicInteger suffix;
+    private static Integer suffix;
 
     /**
      * 流水号
@@ -46,26 +41,37 @@ public class BuildPacketService {
     private static AtomicInteger serialNumer;
 
     private static final byte[] LOGIN_COMMAND = {0x01, 0x02};
+    private static final byte[] HEART_BEAT_COMMAND = {0x00, 0x02};
 
 
-    public static String buildDeviceCode() {
-        return preffix + suffix.incrementAndGet();
+    public static synchronized String buildDeviceCode() {
+        return preffix + suffix++;
     }
 
-    private static short buildSerialNum() {
-        return (short) serialNumer.incrementAndGet();
-    }
 
     /**
      * @return
      */
-    public static byte[] buildLoginPacket(String deviceCode) {
+    public static byte[] buildLoginPacket(String deviceCode, int serialNum) {
 
         byte[] body = "123456".getBytes();
-        short serialNum = buildSerialNum();
         return encodeMsg(LOGIN_COMMAND, serialNum, deviceCode, body);
 
     }
+
+    /**
+     * 创建心跳报文
+     *
+     * @param deviceCode
+     * @return
+     */
+    public static byte[] buildHeartBeatPacket(String deviceCode, int serialNum) {
+
+        byte[] body = new byte[0];
+        return encodeMsg(HEART_BEAT_COMMAND, serialNum, deviceCode, body);
+
+    }
+
 
     /**
      * 封装消息
@@ -129,14 +135,14 @@ public class BuildPacketService {
 
         Tbox tbox = new Tbox();
         //消息体长度
-        short aShort = ByteUtils.getShort(msg, 2);
+        short aShort = ByteUtils.getShort(msg, 3);
         int bodyLength = 0x03ff & aShort;
         //设备号
-        byte[] deviceBytes = ByteUtils.subBytes(msg, 4, 4 + 6);
+        byte[] deviceBytes = ByteUtils.subBytes(msg, 5, 6 + 6);
         String deviceCode = Utils.bcd2String(deviceBytes);
         tbox.setDeviceCode(deviceCode);
         //具体数据
-        byte[] body = ByteUtils.subBytes(msg, 12, 12 + bodyLength);
+        byte[] body = ByteUtils.subBytes(msg, 13, 13 + bodyLength);
         //应答流水号
         short reSerialNum = ByteUtils.getShort(body, 0);
         tbox.setSerialNum(reSerialNum);
@@ -148,4 +154,45 @@ public class BuildPacketService {
         tbox.setRet(body[4]);
         return tbox;
     }
+
+    public static void main(String[] args) {
+        String hex = "7E8001000501311963266617F90001010200627E";
+        byte[] bytes = ByteUtils.hexToByteArray(hex);
+        Tbox tbox = BuildPacketService.parsePacket(bytes);
+        System.out.println(tbox.toString());
+    }
+
+    public static ConcurrentHashMap<Integer, String> getDeviceMap() {
+        return deviceMap;
+    }
+
+    public void setDeviceMap(ConcurrentHashMap<Integer, String> deviceMap) {
+        BuildPacketService.deviceMap = deviceMap;
+    }
+
+    public String getPreffix() {
+        return preffix;
+    }
+
+    public void setPreffix(String preffix) {
+        BuildPacketService.preffix = preffix;
+    }
+
+    public Integer getSuffix() {
+        return suffix;
+    }
+
+    public void setSuffix(Integer suffix) {
+        BuildPacketService.suffix = suffix;
+    }
+
+    public AtomicInteger getSerialNumer() {
+        return serialNumer;
+    }
+
+    public void setSerialNumer(AtomicInteger serialNumer) {
+        BuildPacketService.serialNumer = serialNumer;
+    }
+
+
 }

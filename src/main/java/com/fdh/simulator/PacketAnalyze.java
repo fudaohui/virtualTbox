@@ -4,18 +4,16 @@ package com.fdh.simulator;
 import com.fdh.simulator.listenner.PacketLisenner;
 import net.jodah.expiringmap.ExpiringMap;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.List;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
 /***
  * 数据包性能统计
  */
 public class PacketAnalyze {
 
-    public static AtomicInteger atomicLong = new AtomicInteger(0);
+    public static Short serialNum = 0;
 
 
     /**
@@ -28,10 +26,13 @@ public class PacketAnalyze {
             .build();
 
 
+    public static synchronized short getPacketSerialNum() {
 
+        if (serialNum++ == 65535) {
+            serialNum = 0;
+        }
 
-    public static short getPacketSerialNum() {
-        return (short) atomicLong.incrementAndGet();
+        return serialNum;
     }
 
 

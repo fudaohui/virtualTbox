@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /***
  * 定时任务
  */
-@Data
 public class ScheduleTask extends TimerTask {
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduleTask.class);
@@ -71,5 +70,49 @@ public class ScheduleTask extends TimerTask {
         }
         count--;
         BuildPacketService.sendCount = count;
+    }
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
+    public int getTcpConnections() {
+        return tcpConnections;
+    }
+
+    public void setTcpConnections(int tcpConnections) {
+        this.tcpConnections = tcpConnections;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public int getPackeExpiredTime() {
+        return packeExpiredTime;
+    }
+
+    public void setPackeExpiredTime(int packeExpiredTime) {
+        this.packeExpiredTime = packeExpiredTime;
+    }
+
+    public int getMcount() {
+        return mcount;
+    }
+
+    public void setMcount(int mcount) {
+        this.mcount = mcount;
+    }
+
+    public ThreadPoolTaskExecutor getThreadPoolTaskExecutor() {
+        return threadPoolTaskExecutor;
+    }
+
+    public void setThreadPoolTaskExecutor(ThreadPoolTaskExecutor threadPoolTaskExecutor) {
+        this.threadPoolTaskExecutor = threadPoolTaskExecutor;
     }
 }

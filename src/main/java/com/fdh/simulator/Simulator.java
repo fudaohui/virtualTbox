@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 
-@Data
 public class Simulator {
 
     private ThreadPoolTaskExecutor taskExecutor;
@@ -35,11 +34,6 @@ public class Simulator {
     public void connect() {
 
         logger.info("设置的连接数为:" + tcpConnections);
-        logger.info("初始化设备号中。。。。");
-        for (int i = 0; i < tcpConnections; i++) {
-            BuildPacketService.deviceMap.put(i, BuildPacketService.buildDeviceCode());
-        }
-
         EventLoopGroup workgroup = new NioEventLoopGroup(60);
         for (int i = 0; i < tcpConnections; i++) {
             new Thread(new ConnectTask(address, port, i, workgroup)).start();
@@ -57,4 +51,63 @@ public class Simulator {
     }
 
 
+    public ThreadPoolTaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    public void setTaskExecutor(ThreadPoolTaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
+
+    public static Timer getTimer() {
+        return timer;
+    }
+
+    public static void setTimer(Timer timer) {
+        Simulator.timer = timer;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public int getSendInterval() {
+        return sendInterval;
+    }
+
+    public void setSendInterval(int sendInterval) {
+        this.sendInterval = sendInterval;
+    }
+
+    public int getTcpConnections() {
+        return tcpConnections;
+    }
+
+    public void setTcpConnections(int tcpConnections) {
+        this.tcpConnections = tcpConnections;
+    }
+
+    public TimerTask getTimerTask() {
+        return timerTask;
+    }
+
+    public void setTimerTask(TimerTask timerTask) {
+        this.timerTask = timerTask;
+    }
+
+    public static Logger getLogger() {
+        return logger;
+    }
 }

@@ -35,13 +35,6 @@ public class PacketLisenner implements ExpirationListener<String, Long> {
             NettyChannelManager.removeAll();
             logger.error("断开所有的连接");
             ReportUtils.report();
-            ConcurrentHashMap<Long, Integer> receiveMap = PacketAnalyze.receiveMap;
-            Set<Map.Entry<Long, Integer>> entries = receiveMap.entrySet();
-            for (Map.Entry<Long, Integer> entry : entries) {
-                Long key = entry.getKey();
-                Integer value = entry.getValue();
-                logger.error("数据包：" + key + "过期了，累计耗时：" + value);
-            }
 
         }
 

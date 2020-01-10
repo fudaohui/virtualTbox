@@ -33,7 +33,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.5.Final</version>
+            <version>4.1.21.Final</version>
         </dependency>
         <!-- spring相关依赖-->
         <dependency>

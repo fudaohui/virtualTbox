@@ -36,7 +36,7 @@
 //        } finally {
 ////            long activeChannelSize = NettyChannelManager.getActiveChannelSize();
 ////            if (activeChannelSize <= 0) {
-////                if (PacketAnalyze.packetMap.size() == PacketAnalyze.atomicLong.get()) {
+////                if (PacketAnalyze.packetMap.size() == PacketAnalyze.serialNum.get()) {
 ////
 ////                } else {
 ////
